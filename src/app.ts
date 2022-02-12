@@ -1,15 +1,7 @@
 import express from 'express'
-import debug from 'debug'
-const debugServer = debug('server')
+import v1 from './v1'
 const app = express()
 
-app.use(express.json)
-app.use(express.urlencoded({
-    extended: true
-}))
-app.get('/', (req, res, next) => {
-    debugServer(req.body)
-    res.send({ text: "Hello World!" })
-})
+app.use('/v1', v1)
 
 export default app

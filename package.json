@@ -10,7 +10,8 @@
     "lint": "tslint --project tsconfig.json",
     "build:ts": "tsc",
     "build": "yarn lint && yarn clean && yarn build:ts",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@line/bot-sdk": "^7.4.0",
