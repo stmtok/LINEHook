@@ -5,9 +5,10 @@ COPY ./tsconfig.json ./
 COPY ./tslint.json ./
 COPY ./yarn.lock ./
 COPY ./package.json ./
-COPY ./src/ ./src
+RUN yarn install
 
-RUN yarn install && yarn build
+COPY ./src/ ./src
+RUN yarn build
 
 FROM node:erbium-slim
 WORKDIR /app

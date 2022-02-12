@@ -11,7 +11,8 @@
     "build:ts": "tsc",
     "build": "yarn lint && yarn clean && yarn build:ts",
     "clean": "rm -rf dist",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "build:docker:rpi": "docker buildx build -t registry.stmtok.com/linehook:rpi --platform linux/arm/v7 ."
   },
   "dependencies": {
     "@line/bot-sdk": "^7.4.0",
