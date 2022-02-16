@@ -9,30 +9,36 @@ const channelSecret = process.env.CHANNEL_SECRET || "mock"
 const channelAccessToken = process.env.CHANNEL_ACCESS_TOKEN || "mock"
 const lineMiddleware = middleware({ channelSecret })
 const botClient = new Client({ channelAccessToken })
-const sql = mysql.createConnection({
+const pools = mysql.createPool({
+    connectionLimit: 5,
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: 'line'
 })
 
-sql.connect((err) => {
-    if (err) {
-        debugDB(err.message)
-    } else {
-        debugDB('connection ok')
-    }
-})
+async function getSqlConnection(): Promise<mysql.PoolConnection> {
+    return new Promise((resolve, reject) => {
+        pools.getConnection((err, conn) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(conn)
+            }
+        })
+    })
+}
 
 v1.get('/', (req, res, next) => {
     debugServer(req.url)
     res.send({ version: "1" })
 })
 
-v1.post('/webhook', lineMiddleware, (req, res, next) => {
+v1.post('/webhook', lineMiddleware, async (req, res, next) => {
     const body: WebhookRequestBody = req.body
     debugServer(JSON.stringify(body))
     // イベントを保存
+    const sql = await getSqlConnection()
     sql.query('INSERT INTO events SET ?', { data: JSON.stringify(body) }, (error, response) => {
         if (error) {
             debugDB("insert event:" + error.message)
@@ -82,6 +88,8 @@ v1.post('/webhook', lineMiddleware, (req, res, next) => {
                 break
         }
     })
+    sql.commit()
+    sql.release()
     res.send({ code: "ok" })
 })
 
